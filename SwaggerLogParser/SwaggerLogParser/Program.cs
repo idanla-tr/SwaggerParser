@@ -7,11 +7,11 @@ namespace SwaggerLogParser
 {
     class Program
     {
-        const string FILENAME = "";
+        const string FILENAME = "C:/a.json";
         static void Main(string[] args)
         {
             setFileName();
-            Console.WriteLine("Hello World!");
+            Console.WriteLine("Loading JSON file");
         }
 
         private static void setFileName()
@@ -21,11 +21,10 @@ namespace SwaggerLogParser
 
         void ReadLog()
         {
-            using (StreamReader r = new StreamReader(FILENAME))
-            {
-                string json = r.ReadToEnd();
-                List<Item> items = JsonConvert.DeserializeObject<List<Item>>(json);
-            }
+            using StreamReader r = new StreamReader(FILENAME);
+            string json = r.ReadToEnd();
+            List<Item> items = JsonConvert.DeserializeObject<List<Item>>(json);
+
         }
 
         public class Item
