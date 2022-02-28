@@ -10,16 +10,17 @@ namespace SwaggerLogParser
         const string FILENAME = "C:/a.json";
         static void Main(string[] args)
         {
-            setFileName();
+            SetFileName(args);
+            ReadLog();
             Console.WriteLine("Loading JSON file");
         }
 
-        private static void setFileName()
+        private static void SetFileName(string[] args)
         {
             throw new NotImplementedException();
         }
 
-        void ReadLog()
+        private static void ReadLog()
         {
             using StreamReader r = new StreamReader(FILENAME);
             string json = r.ReadToEnd();
