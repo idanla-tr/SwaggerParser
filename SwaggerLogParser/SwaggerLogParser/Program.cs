@@ -7,17 +7,28 @@ namespace SwaggerLogParser
 {
     class Program
     {
-        const string FILENAME = "C:/a.json";
+        static string FILENAME = "C:/a.json";
         static void Main(string[] args)
         {
-            SetFileName(args);
+            if (args.Length>0)
+            {
+                SetFileName(args);
+            }
+            Console.WriteLine("Loading JSON file...");
             ReadLog();
-            Console.WriteLine("Loading JSON file");
+            Console.WriteLine("Writing results...");
+            WriteResult();
+        }
+
+        private static void WriteResult()
+        {
+            string createText = "Hello and Welcome" + Environment.NewLine;
+            File.WriteAllText("C:/Result.txt", createText);
         }
 
         private static void SetFileName(string[] args)
         {
-            throw new NotImplementedException();
+            FILENAME = args[0];
         }
 
         private static void ReadLog()
