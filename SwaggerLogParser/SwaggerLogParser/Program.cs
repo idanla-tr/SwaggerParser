@@ -25,8 +25,17 @@ namespace SwaggerLogParser
 
         private static void WriteResult(Root myDeserializedClass)
         {
-            string createText = String.Join(Environment.NewLine+ Environment.NewLine, myDeserializedClass.LogicLog);
-            File.WriteAllText("Result.txt", createText);
+            string logicLog = String.Join(Environment.NewLine + Environment.NewLine, myDeserializedClass.LogicLog);
+            File.WriteAllText("Result.txt", "LOGIC LOG:" + Environment.NewLine);
+            File.AppendAllText("Result.txt", logicLog);
+
+            string userData = String.Join(Environment.NewLine + Environment.NewLine, myDeserializedClass.UserData);
+            File.AppendAllText("Result.txt", "USER DATA:" + Environment.NewLine);
+            File.AppendAllText("Result.txt", userData);
+
+            string openPositionSettings = String.Join(Environment.NewLine + Environment.NewLine, myDeserializedClass.OpenPositionSettings);
+            File.AppendAllText("###############################################" + Environment.NewLine + "Result.txt", "Open Position Settings:" + Environment.NewLine);
+            File.AppendAllText("Result.txt", openPositionSettings);
         }
 
         private static void SetFileName(string[] args)
