@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 
 namespace SwaggerLogParser
 {
@@ -25,17 +26,38 @@ namespace SwaggerLogParser
 
         private static void WriteResult(Root myDeserializedClass)
         {
-            string logicLog = String.Join(Environment.NewLine + Environment.NewLine, myDeserializedClass.LogicLog);
-            File.WriteAllText("Result.txt", "LOGIC LOG:" + Environment.NewLine);
-            File.AppendAllText("Result.txt", logicLog);
 
+            /// tradingsettingsprovider.cs - in trading-shared
+            /// 
+
+
+
+
+
+            File.WriteAllText("Result.txt", " ");
+
+            //Append Resources and their responses (extracted and parsed selected value:)
+
+            //Append leverages and isSettled/CFD
+
+            //Append User data - parsed comfortably
             string userData = String.Join(Environment.NewLine + Environment.NewLine, myDeserializedClass.UserData);
-            File.AppendAllText("Result.txt", "USER DATA:" + Environment.NewLine);
+            File.AppendAllText("Result.txt", Environment.NewLine + Environment.NewLine + "##############################################################################################################################################################" + Environment.NewLine + Environment.NewLine + "USER DATA:" + Environment.NewLine);
             File.AppendAllText("Result.txt", userData);
 
-            string openPositionSettings = String.Join(Environment.NewLine + Environment.NewLine, myDeserializedClass.OpenPositionSettings);
-            File.AppendAllText("###############################################" + Environment.NewLine + "Result.txt", "Open Position Settings:" + Environment.NewLine);
+            //Append Final Open Position Settings
+            File.AppendAllText("Result.txt", myDeserializedClass.LogicLog.Last());
+
+            string logicLog = String.Join(Environment.NewLine + Environment.NewLine, myDeserializedClass.LogicLog);
+            File.AppendAllText("Result.txt", "LOGIC LOG:" + Environment.NewLine + Environment.NewLine);
+            File.AppendAllText("Result.txt", logicLog);
+
+
+            /*
+             * string openPositionSettings = String.Join(Environment.NewLine + Environment.NewLine, myDeserializedClass.OpenPositionSettings.BlockedFormCFD);
+            File.AppendAllText("Result.txt", Environment.NewLine + Environment.NewLine + "##############################################################################################################################################################" + Environment.NewLine + "Open Position Settings:" + Environment.NewLine);
             File.AppendAllText("Result.txt", openPositionSettings);
+            */
         }
 
         private static void SetFileName(string[] args)
@@ -208,7 +230,7 @@ namespace SwaggerLogParser
             public int InstrumentTypeID { get; set; }
             public bool IsBuy { get; set; }
             public int NopLimit { get; set; }
-            public int Nop { get; set; }
+            public double Nop { get; set; }
             public bool MaxNopReached { get; set; }
         }
 
