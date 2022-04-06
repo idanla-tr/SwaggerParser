@@ -13,6 +13,7 @@ namespace SwaggerLogParser
 
         static void Main(string[] args)
         {
+            //(string)Clipboard.GetData(DataFormats.Text);
             if (args.Length > 0)
             {
                 SetFileName(args);

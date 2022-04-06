@@ -1,6 +1,150 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿namespace eToro.Trading.TradingSettingsAPI.DomainLogicServices
+{
+    public static class Util
+    {
+        public delegate bool TryParseHandler<T>(string value, out T result);
+
+        public static bool TryParse<T>(string value, TryParseHandler<T> handler, out T result) where T : struct
+        {
+            result = default(T);
+            return !string.IsNullOrEmpty(value) && handler(value, out result);
+        }
+
+        private static bool TryExtractSelectedValue<TResult>(IDictionary<string, SettingsItem> dictionary, string resourceName, TryParseHandler<TResult> handler, out TResult selectedValue, out string processLog) where TResult : struct
+        {
+            selectedValue = default(TResult);
+            //1. try to extract the the setting item 
+            if (!dictionary.TryGetValue(resourceName, out var setting))
+            {
+                processLog = $"resource: '{resourceName}' was not found in  resource To Settings Items Dictionary";
+                return false;
+            }
+            //2. try to parse
+            if (!TryParse(setting.SelectedValue, handler, out selectedValue))
+            {
+                string errStr =
+                    $"Failed to parse eToroSettings resource '{resourceName}' selected value: '{setting.SelectedValue}' as {typeof(TResult).Name}";
+                processLog = errStr;
+                Logger.WriteLog(ELogLevel.WARN, errStr);
+                return false;
+            }
+
+            processLog = $"Resource '{resourceName}' extracted and parsed Selected value: {selectedValue.ToString()}";
+            return true;
+
+        }
+
+        public static bool TryExtractSelectedValue(IDictionary<string, SettingsItem> dictionary, string resourceName, out int selectedValue, out string processLog)
+        {
+            return TryExtractSelectedValue(dictionary, resourceName, int.TryParse, out selectedValue, out processLog);
+        }
+
+        public static bool TryExtractSelectedValue(IDictionary<string, SettingsItem> dictionary, string resourceName, out bool selectedValue, out string processLog)
+        {
+            return TryExtractSelectedValue(dictionary, resourceName, bool.TryParse, out selectedValue, out processLog);
+
+        }
+
+        public static bool TryExtractSelectedValue(IDictionary<string, SettingsItem> dictionary, string resourceName, out decimal selectedValue, out string processLog)
+        {
+            return TryExtractSelectedValue(dictionary, resourceName, decimal.TryParse, out selectedValue, out processLog);
+
+        }
+        public static decimal? ExtractDecimalSetting(
+            IDictionary<string, SettingsItem> settingsItemsDictionary,
+            string resourceName,
+            StringBuilder processLog)
+        {
+            var settingHasValue = Util.TryExtractSelectedValue(settingsItemsDictionary, resourceName,
+                out decimal settingValue, out var extractProcessLog);
+
+            AppendExtractProcessLog(processLog, extractProcessLog);
+
+            return settingHasValue ? settingValue : new decimal?();
+        }
+
+        public static bool? ExtractBoolSetting(
+            IDictionary<string, SettingsItem> settingsItemsDictionary,
+            string resourceName,
+            StringBuilder processLog)
+        {
+            var settingHasValue = Util.TryExtractSelectedValue(settingsItemsDictionary, resourceName,
+                out bool settingValue, out var extractProcessLog);
+
+            AppendExtractProcessLog(processLog, extractProcessLog);
+
+            return settingHasValue ? settingValue : new bool?();
+        }
+
+        private static void AppendExtractProcessLog(StringBuilder processLog, string extractProcessLog)
+        {
+            processLog.AppendLine(extractProcessLog);
+        }
+
+        public static T ExtractObject<T>(Dictionary<string, SettingsItem> settingsItems, string resourceName, string clientRequestId, out string log)
+        {
+            var obj = default(T);
+            var sb = new StringBuilder();
+            if (TryExtractSelectedValue(settingsItems, resourceName, out string jsonValue, out string processLog))
+            {
+                sb.AppendLine(processLog);
+                try
+                {
+                    obj = JsonConvert.DeserializeObject<T>(jsonValue);
+
+                    if (obj == null)
+                    {
+                        sb.AppendLine(
+                            $"failed to Deserialize JSON Selected value from resource: {resourceName}");
+                        Logger.WriteLog(ELogLevel.ERROR,
+                            string.Format(
+                                "Util.TryExtractObject: JSON object Deserialization FAILURE! {1}, Resource: {2}, ClientRequestId : {0}{1}",
+                                clientRequestId, Environment.NewLine, resourceName));
+                    }
+                }
+                catch (Exception e)
+                {
+                    sb.AppendLine(
+                        $"failed to Deserialize JSON Selected value from resource: {resourceName}");
+                    Logger.WriteLog(ELogLevel.ERROR,
+                        string.Format(
+                            "Util.TryExtractObject: JSON object Deserialization FAILURE! {2}, Resource: {3}, ClientRequestId : {0}{2}{1}",
+                            clientRequestId, e.Message, Environment.NewLine, resourceName));
+                }
+            }
+            log = sb.ToString();
+            return obj;
+        }
+
+        internal static bool TryExtractSelectedValue(Dictionary<string, SettingsItem> dictionary, string resourceName, out string selectedValue, out string processLog)
+        {
+            selectedValue = string.Empty;
+            //1. try to extract the the setting item 
+            SettingsItem setting;
+            if (!dictionary.TryGetValue(resourceName, out setting))
+            {
+                processLog = string.Format("Resource: '{0}' was not found in  resource To Settings Items Dictionary", resourceName);
+                return false;
+            }
+
+            //2. try to parse
+            if (string.IsNullOrEmpty(setting.SelectedValue))
+            {
+                string errStr = string.Format("eToroSettings Resource '{0}' selected value returned null or empty", resourceName);
+                processLog = errStr;
+                Logger.WriteLog(ELogLevel.WARN, errStr);
+                return false;
+            }
+
+            selectedValue = setting.SelectedValue;
+            processLog = string.Format("Resource '{0}' extracted and parsed Selected value: {1}", resourceName, selectedValue.ToString());
+            return true;
+        }
+    }
+}
+
+
+
 
 namespace SwaggerLogParser
 {
